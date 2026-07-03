@@ -7,6 +7,15 @@ the codebase, you are probably right to stay away.
 
 ## High Priority
 
+- BUILT_IN_GATEWAY
+- build custom gateway integrations into core odysseus tools (built into odysseus and managable from within odysseus)
+    Examples:
+      1. MCP Gateway 
+      2. Tool Calling Gateway
+      3. Cookbook Gateway
+
+- Self-Scaffolding
+
 - SQUASH BUGS
 - Fresh install smoke tests on Linux, macOS, and Windows. Docker, native Python,
   and WSL all need coverage.
