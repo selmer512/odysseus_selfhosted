@@ -51,6 +51,10 @@ def new_row(owner: str | None, **fields) -> dict:
     return {"id": str(uuid.uuid4()), "owner": owner, "created_at": ts, "updated_at": ts, **fields}
 
 
+def table_registry():
+    return {}
+
+
 class AgenticCodingStore:
     def list_rows(self, collection: str, owner: str | None = None, **filters) -> list[dict]:
         rows = [row for row in load_store()[collection] if visible(owner, row)]
