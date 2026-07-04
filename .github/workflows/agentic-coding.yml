@@ -6,7 +6,9 @@ on:
   pull_request:
     paths:
       - 'src/agentic_coding/**'
+      - 'companion/__init__.py'
       - 'companion/agentic_coding_ui.py'
+      - 'static/agentic-coding.*'
       - 'tests/test_agentic_coding*.py'
       - '.github/workflows/agentic-coding.yml'
 
