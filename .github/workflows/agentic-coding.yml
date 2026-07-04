@@ -23,4 +23,4 @@ jobs:
           python-version: '3.11'
           cache: pip
       - run: pip install -r requirements.txt
-      - run: python -m pytest -q tests/test_agentic_coding_security.py tests/test_agentic_coding_scaffold.py
+      - run: python -m pytest -q tests/test_agentic_coding_security.py tests/test_agentic_coding_scaffold.py tests/test_agentic_coding_routes.py
