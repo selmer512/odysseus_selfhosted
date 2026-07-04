@@ -59,7 +59,7 @@ def table_registry():
 
 class AgenticCodingStore:
     def __init__(self) -> None:
-        pass
+        table_registry()
 
     def list_rows(self, collection: str, owner: str | None = None, **filters) -> list[dict]:
         rows = [row for row in load_store()[collection] if visible(owner, row)]
