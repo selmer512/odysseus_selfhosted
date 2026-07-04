@@ -38,6 +38,13 @@ def _db_key(key: str) -> str:
     return key
 
 
+def _encode(row: dict[str, Any]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for key, value in row.items():
+        out[_db_key(key)] = json.dumps(value, ensure_ascii=False) if key in JSON_FIELDS else value
+    return out
+
+
 class AgenticCodingSqlStore:
     def __init__(self) -> None:
         self.ensure_schema()
