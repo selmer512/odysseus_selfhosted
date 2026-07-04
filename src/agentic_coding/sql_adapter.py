@@ -45,6 +45,19 @@ def _encode(row: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _decode(row: dict[str, Any]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for key, value in row.items():
+        public = "metadata" if key == "metadata_json" else key
+        if public in JSON_FIELDS and isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except Exception:
+                value = {} if public in {"metadata", "metrics", "repo_map"} else []
+        out[public] = value
+    return out
+
+
 class AgenticCodingSqlStore:
     def __init__(self) -> None:
         self.ensure_schema()
