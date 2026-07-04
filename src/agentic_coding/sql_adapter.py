@@ -1,0 +1,28 @@
+"""SQL storage adapter for Agentic Coding."""
+
+from __future__ import annotations
+
+import json
+from typing import Any
+
+from sqlalchemy import and_, insert, select, update
+
+from core.database import engine
+from src.agentic_coding.storage import new_row, now_iso, visible
+from src.agentic_coding.sql_storage import metadata as core_metadata, workspaces_table, scaffolds_table
+from src.agentic_coding.sql_runs import metadata as run_metadata, runs_table
+from src.agentic_coding.sql_outputs import metadata as output_metadata, outputs_table
+from src.agentic_coding.sql_metrics import metadata as metric_metadata, metrics_table
+from src.agentic_coding.sql_events import metadata as event_metadata, events_table
+
+
+TABLES = {
+    "workspaces": workspaces_table,
+    "scaffolds": scaffolds_table,
+    "runs": runs_table,
+    "steps": events_table,
+    "artifacts": outputs_table,
+    "benchmarks": metrics_table,
+}
+
+JSON_FIELDS = {"repo_map", "likely_files", "inspection_commands", "implementation_plan", "test_plan", "rollback_plan", "metadata", "metrics"}
