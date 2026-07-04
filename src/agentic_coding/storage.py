@@ -60,9 +60,10 @@ def table_registry():
 
 def sql_rows(collection: str) -> list[dict]:
     table = table_registry()[collection]
+    module = importlib.import_module("src.agentic_coding.sql_adapter")
     with engine.connect() as conn:
         rows = conn.execute(select(table)).mappings().all()
-    return [dict(row) for row in rows]
+    return [getattr(module, "_decode")(dict(row)) for row in rows]
 
 
 class AgenticCodingStore:
