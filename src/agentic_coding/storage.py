@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from core.database import engine
 from src.constants import DATA_DIR
 
 STORE_PATH = Path(DATA_DIR) / "agentic_coding.json"
