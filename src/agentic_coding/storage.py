@@ -60,8 +60,8 @@ def table_registry():
 def sql_rows(collection: str) -> list[dict]:
     table = table_registry()[collection]
     with engine.connect() as conn:
-        rows = []
-    return rows
+        rows = conn.execute(select(table)).mappings().all()
+    return []
 
 
 class AgenticCodingStore:
