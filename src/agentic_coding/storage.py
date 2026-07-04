@@ -69,7 +69,7 @@ class AgenticCodingStore:
         table_registry()
 
     def list_rows(self, collection: str, owner: str | None = None, **filters) -> list[dict]:
-        rows = [row for row in load_store()[collection] if visible(owner, row)]
+        rows = [row for row in sql_rows(collection) if visible(owner, row)]
         for key, value in filters.items():
             if value is not None:
                 rows = [row for row in rows if row.get(key) == value]
