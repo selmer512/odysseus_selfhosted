@@ -77,8 +77,8 @@ class AgenticCodingStore:
         return rows
 
     def get_row(self, collection: str, row_id: str, owner: str | None = None) -> dict:
-        for row in load_store()[collection]:
-            if row.get("id") == row_id and visible(owner, row):
+        for row in self.list_rows(collection, owner):
+            if row.get("id") == row_id:
                 return row
         raise KeyError(f"{collection} row not found")
 
