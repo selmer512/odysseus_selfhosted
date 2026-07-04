@@ -5,6 +5,7 @@
   var workspaceSelect = document.getElementById('workspace-select');
   var profileSelect = document.getElementById('profile-select');
   var latestScaffold = null;
+  var latestRun = null;
 
   function show(value){
     if(!log) return;
@@ -70,6 +71,7 @@
       var model = profileSelect && profileSelect.value;
       var scaffold = await api('/scaffolds', {method:'POST', body: JSON.stringify({workspace_id:workspaceId, user_goal:goal, model:model || null})});
       latestScaffold = scaffold.id;
+      latestRun = null;
       show(scaffold);
     }catch(error){ show(String(error)); }
   }
@@ -81,9 +83,29 @@
     }catch(error){ show(String(error)); }
   }
 
+  async function createRun(){
+    try{
+      if(!latestScaffold){ throw new Error('Create and approve a scaffold first.'); }
+      var run = await api('/runs', {method:'POST', body: JSON.stringify({scaffold_id: latestScaffold})});
+      latestRun = run.id;
+      show(run);
+    }catch(error){ show(String(error)); }
+  }
+
+  async function executeRun(){
+    try{
+      if(!latestRun){ throw new Error('Create a run first.'); }
+      var run = await api('/runs/' + latestRun + '/execute', {method:'POST'});
+      var artifacts = await api('/runs/' + latestRun + '/artifacts');
+      show({run: run, artifacts: artifacts.artifacts || []});
+    }catch(error){ show(String(error)); }
+  }
+
   window.agenticCodingRefresh = refresh;
   window.agenticCreateWorkspace = createWorkspace;
   window.agenticCreateScaffold = createScaffold;
   window.agenticApproveScaffold = approveScaffold;
+  window.agenticCreateRun = createRun;
+  window.agenticExecuteRun = executeRun;
   refresh();
 })();
