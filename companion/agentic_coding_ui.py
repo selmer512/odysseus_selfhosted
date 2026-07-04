@@ -33,20 +33,31 @@ _PAGE = """<!doctype html>
   <main>
     <section class="card">
       <span class="pill" id="agentic-status">Checking backend...</span>
-      <h2>Workflow</h2>
-      <ol>
-        <li>Register a vetted workspace.</li>
-        <li>Scan the repository.</li>
-        <li>Create and approve a scaffold.</li>
-        <li>Create a run and prepare artifacts.</li>
-      </ol>
-      <button onclick="agenticCodingRefresh()">Refresh status</button>
+      <h2>Workspace</h2>
+      <label>Path</label>
+      <input id="workspace-path" placeholder="/workspace/odysseus">
+      <label>Title</label>
+      <input id="workspace-title" placeholder="Odysseus repository">
+      <button onclick="agenticCreateWorkspace()">Register workspace</button>
+      <button class="secondary" onclick="agenticCodingRefresh()">Refresh</button>
+      <div id="workspace-list"></div>
     </section>
     <section class="card">
-      <h2>Backend status</h2>
-      <pre id="agentic-log">Loading...</pre>
+      <h2>Scaffold</h2>
+      <label>Workspace</label>
+      <select id="workspace-select"></select>
+      <label>Model profile</label>
+      <select id="profile-select"></select>
+      <label>Goal</label>
+      <textarea id="scaffold-goal" placeholder="Describe the code change to plan..."></textarea>
+      <button onclick="agenticCreateScaffold()">Generate scaffold</button>
+      <button class="secondary" onclick="agenticApproveScaffold()">Approve latest scaffold</button>
     </section>
   </main>
+  <section class="card output-card">
+    <h2>Output</h2>
+    <pre id="agentic-log">Loading...</pre>
+  </section>
   <script src="/static/agentic-coding.js"></script>
 </body>
 </html>"""
