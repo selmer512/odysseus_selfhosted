@@ -21,6 +21,9 @@ workspaces_table = Table(
     Column("updated_at", String, nullable=False),
     Column("title", String),
     Column("path", String, nullable=False),
+    Column("canonical_path", String),
+    Column("default_branch", String),
+    Column("last_scan_at", String),
     Column("is_active", String, default="true"),
 )
 
@@ -36,6 +39,7 @@ scaffolds_table = Table(
     Column("endpoint_id", String),
     Column("model", String),
     Column("status", String, default="draft"),
+    Column("approved_at", String),
     Column("title", String),
     Column("user_goal", Text, nullable=False),
     Column("repo_map", Text),
