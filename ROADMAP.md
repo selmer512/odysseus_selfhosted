@@ -14,7 +14,12 @@ the codebase, you are probably right to stay away.
       2. Tool Calling Gateway
       3. Cookbook Gateway
 
-- Self-Scaffolding
+- Agentic Coding / Self-Scaffolding
+  - built-in repo-aware coding workflow using existing auth, owner scoping, workspace vetting, model endpoints, MCP/tool execution, task history, and artifacts
+  - coding model profiles and filters for local/API endpoints
+  - review-first scaffolds before execution
+  - approval gates for destructive commands
+  - test, benchmark, commit-message, and PR-summary artifacts
 
 - SQUASH BUGS
 - Fresh install smoke tests on Linux, macOS, and Windows. Docker, native Python,
@@ -64,6 +69,7 @@ the codebase, you are probably right to stay away.
 
 ## Frontend
 
+- Agentic Coding UI shell: sidebar/rail entry, `/agentic-coding` SPA route, workspace picker, coding-model picker, scaffold review panel, run timeline, artifact viewer, and benchmark cards.
 - Expand the Editor for quicker, more robust everyday use. Better file/document
   handling, smoother window behavior, clearer save/export flows, stronger image
   editing affordances, and fewer brittle edge cases.
@@ -79,6 +85,7 @@ the codebase, you are probably right to stay away.
 
 ## Backend
 
+- Agentic Coding database-backed storage for workspaces, scaffolds, runs, steps, artifacts, benchmarks, and owner-scoped memory suggestions.
 - More tests around endpoint probing and provider setup.
 - Better task scheduler defaults and visibility.
 - Backup/restore guide and helper flow for `data/`.
