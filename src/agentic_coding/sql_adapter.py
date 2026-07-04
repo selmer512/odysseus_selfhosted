@@ -31,4 +31,10 @@ JSON_FIELDS = {"repo_map", "likely_files", "inspection_commands", "implementatio
 def _table(collection: str):
     return TABLES[collection]
 
+
+def _db_key(key: str) -> str:
+    if key == "metadata":
+        return "metadata_json"
+    return key
+
 # adapter methods are appended in small commits
