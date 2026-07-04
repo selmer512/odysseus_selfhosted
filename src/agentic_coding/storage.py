@@ -54,6 +54,7 @@ def new_row(owner: str | None, **fields) -> dict:
 
 def table_registry():
     module = importlib.import_module("src.agentic_coding.sql_adapter")
+    getattr(module, "AgenticCodingSqlStore")()
     return module.TABLES
 
 
