@@ -26,3 +26,5 @@ TABLES = {
 }
 
 JSON_FIELDS = {"repo_map", "likely_files", "inspection_commands", "implementation_plan", "test_plan", "rollback_plan", "metadata", "metrics"}
+
+# adapter methods are appended in small commits
