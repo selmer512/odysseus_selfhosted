@@ -28,6 +28,25 @@ Expected shape:
 {"ok": true, "feature": "agentic-coding"}
 ```
 
+## Open the UI shell
+
+Open:
+
+```text
+http://localhost:7000/agentic-coding
+```
+
+The first UI shell can:
+
+- check Agentic Coding backend health
+- list model profiles
+- register a vetted workspace
+- list registered workspaces
+- create a scaffold
+- approve the latest scaffold
+- create a run
+- prepare run artifacts
+
 ## Operational flow
 
 1. Register a vetted workspace.
@@ -71,9 +90,9 @@ Implemented route groups:
 ## Test command
 
 ```bash
-python -m pytest -q tests/test_agentic_coding_security.py tests/test_agentic_coding_scaffold.py
+python -m pytest -q tests/test_agentic_coding_security.py tests/test_agentic_coding_scaffold.py tests/test_agentic_coding_routes.py tests/test_agentic_coding_ui.py tests/test_agentic_coding_model_profiles.py
 ```
 
 ## Next deployment slice
 
-The next slice should add the SPA shell, database-backed storage, model endpoint capability columns, Cookbook coding presets, and full route integration tests.
+The next slice should add database-backed storage, model endpoint capability columns, Cookbook coding presets, richer artifact viewing, and full route integration tests.
