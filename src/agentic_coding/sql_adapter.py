@@ -41,6 +41,8 @@ def _db_key(key: str) -> str:
 def _encode(row: dict[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for key, value in row.items():
+        if isinstance(value, bool):
+            value = "true" if value else "false"
         out[_db_key(key)] = json.dumps(value, ensure_ascii=False) if key in JSON_FIELDS else value
     return out
 
@@ -54,6 +56,8 @@ def _decode(row: dict[str, Any]) -> dict[str, Any]:
                 value = json.loads(value)
             except Exception:
                 value = {} if public in {"metadata", "metrics", "repo_map"} else []
+        if public == "is_active" and isinstance(value, str):
+            value = value.lower() == "true"
         out[public] = value
     return out
 
