@@ -83,10 +83,10 @@ class AgenticCodingStore:
         raise KeyError(f"{collection} row not found")
 
     def add_row(self, collection: str, owner: str | None = None, **fields) -> dict:
-        data = load_store()
         row = new_row(owner, **fields)
-        data[collection].append(row)
-        save_store(data)
+        table = table_registry()[collection]
+        with engine.begin() as conn:
+            conn.execute(table.insert().values(**row))
         return row
 
     def update_row(self, collection: str, row_id: str, owner: str | None = None, **fields) -> dict:
