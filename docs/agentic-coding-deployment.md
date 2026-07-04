@@ -47,6 +47,19 @@ The first UI shell can:
 - create a run
 - prepare run artifacts
 
+## Storage
+
+Agentic Coding state is persisted through Odysseus database-backed SQLAlchemy table metadata. The active store keeps the existing `AgenticCodingStore` interface while using SQL tables for list, get, add, and update operations.
+
+Tables:
+
+- `agentic_coding_workspaces`
+- `agentic_coding_scaffolds`
+- `agentic_coding_runs`
+- `agentic_coding_steps`
+- `agentic_coding_artifacts`
+- `agentic_coding_benchmarks`
+
 ## Operational flow
 
 1. Register a vetted workspace.
@@ -95,4 +108,4 @@ python -m pytest -q tests/test_agentic_coding_security.py tests/test_agentic_cod
 
 ## Next deployment slice
 
-The next slice should add database-backed storage, model endpoint capability columns, Cookbook coding presets, richer artifact viewing, and full route integration tests.
+The next slice should add model endpoint capability columns, Cookbook coding presets, richer artifact viewing, and full route integration tests.
