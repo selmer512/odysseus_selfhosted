@@ -85,8 +85,11 @@ class AgenticCodingStore:
     def add_row(self, collection: str, owner: str | None = None, **fields) -> dict:
         row = new_row(owner, **fields)
         table = table_registry()[collection]
+        module = importlib.import_module("src.agentic_coding.sql_adapter")
+        payload = getattr(module, "_encode")(row)
+        payload = {key: value for key, value in payload.items() if key in table.c}
         with engine.begin() as conn:
-            conn.execute(table.insert().values(**row))
+            conn.execute(table.insert().values(**payload))
         return row
 
     def update_row(self, collection: str, row_id: str, owner: str | None = None, **fields) -> dict:
