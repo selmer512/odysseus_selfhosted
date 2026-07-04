@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import uuid
 from datetime import datetime, timezone
@@ -52,7 +53,8 @@ def new_row(owner: str | None, **fields) -> dict:
 
 
 def table_registry():
-    return {}
+    module = importlib.import_module("src.agentic_coding.sql_adapter")
+    return module.TABLES
 
 
 class AgenticCodingStore:
