@@ -61,7 +61,7 @@ def sql_rows(collection: str) -> list[dict]:
     table = table_registry()[collection]
     with engine.connect() as conn:
         rows = conn.execute(select(table)).mappings().all()
-    return []
+    return [dict(row) for row in rows]
 
 
 class AgenticCodingStore:
