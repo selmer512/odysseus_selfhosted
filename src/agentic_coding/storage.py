@@ -1,4 +1,4 @@
-"""Minimal JSON storage for the Agentic Coding first slice."""
+"""Agentic Coding storage."""
 
 from __future__ import annotations
 
