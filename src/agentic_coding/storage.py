@@ -59,7 +59,9 @@ def table_registry():
 
 def sql_rows(collection: str) -> list[dict]:
     table = table_registry()[collection]
-    return []
+    with engine.connect() as conn:
+        rows = []
+    return rows
 
 
 class AgenticCodingStore:
