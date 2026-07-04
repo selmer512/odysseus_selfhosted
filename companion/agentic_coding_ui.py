@@ -52,6 +52,8 @@ _PAGE = """<!doctype html>
       <textarea id="scaffold-goal" placeholder="Describe the code change to plan..."></textarea>
       <button onclick="agenticCreateScaffold()">Generate scaffold</button>
       <button class="secondary" onclick="agenticApproveScaffold()">Approve latest scaffold</button>
+      <button class="secondary" onclick="agenticCreateRun()">Create run</button>
+      <button class="secondary" onclick="agenticExecuteRun()">Prepare artifacts</button>
     </section>
   </main>
   <section class="card output-card">
