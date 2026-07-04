@@ -27,4 +27,8 @@ TABLES = {
 
 JSON_FIELDS = {"repo_map", "likely_files", "inspection_commands", "implementation_plan", "test_plan", "rollback_plan", "metadata", "metrics"}
 
+
+def _table(collection: str):
+    return TABLES[collection]
+
 # adapter methods are appended in small commits
