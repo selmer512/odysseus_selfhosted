@@ -7,6 +7,12 @@
   var latestScaffold = null;
   var latestRun = null;
 
+  function esc(value){
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+  }
+
   function show(value){
     if(!log) return;
     log.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
@@ -22,14 +28,14 @@
   }
 
   function option(value, label){
-    return '<option value="' + String(value || '').replace(/"/g, '&quot;') + '">' + String(label || value || '') + '</option>';
+    return '<option value="' + esc(value) + '">' + esc(label || value || '') + '</option>';
   }
 
   function renderWorkspaces(rows){
     rows = rows || [];
     if(workspaceList){
       workspaceList.innerHTML = rows.length ? rows.map(function(row){
-        return '<div class="mini-card"><b>' + (row.title || row.path || row.id) + '</b><div class="muted">' + (row.path || '') + '</div></div>';
+        return '<div class="mini-card"><b>' + esc(row.title || row.path || row.id) + '</b><div class="muted">' + esc(row.path || '') + '</div></div>';
       }).join('') : '<p class="muted">No workspaces registered yet.</p>';
     }
     if(workspaceSelect){
