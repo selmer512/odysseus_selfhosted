@@ -37,4 +37,11 @@ def _db_key(key: str) -> str:
         return "metadata_json"
     return key
 
-# adapter methods are appended in small commits
+
+class AgenticCodingSqlStore:
+    def __init__(self) -> None:
+        self.ensure_schema()
+
+    def ensure_schema(self) -> None:
+        for meta in (core_metadata, run_metadata, output_metadata, metric_metadata, event_metadata):
+            meta.create_all(engine, checkfirst=True)
