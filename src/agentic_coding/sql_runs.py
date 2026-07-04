@@ -13,6 +13,13 @@ runs_table = Table(
     Column("updated_at", String, nullable=False),
     Column("workspace_id", String, index=True, nullable=False),
     Column("scaffold_id", String, index=True, nullable=False),
+    Column("session_id", String),
+    Column("endpoint_id", String),
+    Column("model", String),
     Column("status", String, default="pending"),
+    Column("approval_mode", String, default="explicit"),
     Column("summary", Text),
+    Column("started_at", String),
+    Column("completed_at", String),
+    Column("metadata_json", Text),
 )
