@@ -57,6 +57,10 @@ def table_registry():
     return module.TABLES
 
 
+def sql_rows(collection: str) -> list[dict]:
+    return []
+
+
 class AgenticCodingStore:
     def __init__(self) -> None:
         table_registry()
