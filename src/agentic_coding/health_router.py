@@ -75,6 +75,10 @@ def _missing(exc: KeyError) -> HTTPException:
     return HTTPException(404, str(exc))
 
 
+def _payload(body: BaseModel) -> dict:
+    return body.dict()
+
+
 def _artifact_content(title: str, content: str) -> str:
     return f"# {title}\n\n{content.strip()}\n"
 
@@ -110,7 +114,7 @@ def make_router() -> APIRouter:
 
     @router.patch("/workspaces/{workspace_id}")
     def patch_workspace(request: Request, workspace_id: str, body: WorkspacePatch):
-        updates = {k: v for k, v in body.model_dump().items() if v is not None}
+        updates = {k: v for k, v in _payload(body).items() if v is not None}
         try:
             return store.update_row("workspaces", workspace_id, _owner(request), **updates)
         except KeyError as exc:
@@ -132,7 +136,6 @@ def make_router() -> APIRouter:
     def coding_models(request: Request):
         owner = _owner(request)
         from core.database import ModelEndpoint, SessionLocal
-
         out = []
         db = SessionLocal()
         try:
@@ -141,16 +144,8 @@ def make_router() -> APIRouter:
                 q = q.filter((ModelEndpoint.owner == owner) | (ModelEndpoint.owner == None))  # noqa: E711
             for endpoint in q.all():
                 capabilities = coding_capabilities_from_endpoint(endpoint)
-                if not capabilities.get("coding"):
-                    continue
-                out.append({
-                    "endpoint_id": endpoint.id,
-                    "name": endpoint.name,
-                    "base_url": endpoint.base_url,
-                    "model_type": endpoint.model_type,
-                    "supports_tools": endpoint.supports_tools,
-                    "capabilities": capabilities,
-                })
+                if capabilities.get("coding"):
+                    out.append({"endpoint_id": endpoint.id, "name": endpoint.name, "base_url": endpoint.base_url, "model_type": endpoint.model_type, "supports_tools": endpoint.supports_tools, "capabilities": capabilities})
         finally:
             db.close()
         return {"models": out}
@@ -159,7 +154,6 @@ def make_router() -> APIRouter:
     def model_health(request: Request, endpoint_id: str):
         owner = _owner(request)
         from core.database import ModelEndpoint, SessionLocal
-
         db = SessionLocal()
         try:
             q = db.query(ModelEndpoint).filter(ModelEndpoint.id == endpoint_id)
@@ -192,7 +186,7 @@ def make_router() -> APIRouter:
 
     @router.patch("/scaffolds/{scaffold_id}")
     def patch_scaffold(request: Request, scaffold_id: str, body: ScaffoldPatch):
-        updates = {k: v for k, v in body.model_dump().items() if v is not None}
+        updates = {k: v for k, v in _payload(body).items() if v is not None}
         try:
             return store.update_row("scaffolds", scaffold_id, _owner(request), **updates)
         except KeyError as exc:
@@ -243,8 +237,7 @@ def make_router() -> APIRouter:
 
     @router.get("/runs/{run_id}/events")
     def run_events(request: Request, run_id: str):
-        owner = _owner(request)
-        return {"events": store.list_rows("steps", owner, run_id=run_id)}
+        return {"events": store.list_rows("steps", _owner(request), run_id=run_id)}
 
     @router.post("/runs/{run_id}/execute")
     async def execute_run(request: Request, run_id: str):
@@ -309,8 +302,7 @@ def make_router() -> APIRouter:
 
     @router.post("/benchmarks")
     def create_benchmark(request: Request, body: BenchmarkCreate):
-        owner = _owner(request)
-        return store.add_row("benchmarks", owner, status="recorded", **body.model_dump())
+        return store.add_row("benchmarks", _owner(request), status="recorded", **_payload(body))
 
     @router.get("/benchmarks/{benchmark_id}")
     def get_benchmark(request: Request, benchmark_id: str):
