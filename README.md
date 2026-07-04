@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  A self-hosted AI workspace for chat, agents, research, documents, email, notes, calendar, and local model workflows.
+  A self-hosted AI workspace for chat, agents, research, documents, email, notes, calendar, local model workflows, and repo-aware coding.
 </p>
 
 <p align="center">
@@ -41,6 +41,7 @@ Native installs, GPU notes, Windows/macOS instructions, HTTPS, and configuration
 ## Features
 
 - **Chat + Agents** — local/API models, tools, MCP, files, shell, skills, and memory.
+- **Agentic Coding** — local/API coding models, repo-aware scaffolds, workspace-confined code review, approval gates, tests, artifacts, benchmarks, and commit/PR prep.
 - **Cookbook** — hardware-aware model recommendations, downloads, and serving.
 - **Deep Research** — multi-step web research with source reading and report generation.
 - **Compare** — blind side-by-side model testing and synthesis.
@@ -60,6 +61,8 @@ Help is welcome. The best entry points are fresh-install testing, provider setup
 ## Security
 
 Odysseus is a self-hosted workspace with powerful local tools. Keep auth enabled, keep private data out of Git, and do not expose raw model/service ports publicly. Deployment details are in the [setup guide](docs/setup.md#security-notes).
+
+Agentic Coding uses the existing Odysseus auth, owner scoping, workspace confinement, shell/admin gates, MCP policy, and model endpoint controls. Keep raw model ports private and require approval before destructive coding commands.
 
 ## Star History
 
