@@ -58,6 +58,7 @@ def table_registry():
 
 
 def sql_rows(collection: str) -> list[dict]:
+    table = table_registry()[collection]
     return []
 
 
