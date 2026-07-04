@@ -94,11 +94,13 @@ class AgenticCodingStore:
         return row
 
     def update_row(self, collection: str, row_id: str, owner: str | None = None, **fields) -> dict:
-        data = load_store()
-        for row in data[collection]:
-            if row.get("id") == row_id and visible(owner, row):
-                row.update(fields)
-                row["updated_at"] = now_iso()
-                save_store(data)
-                return row
-        raise KeyError(f"{collection} row not found")
+        existing = self.get_row(collection, row_id, owner)
+        existing.update(fields)
+        existing["updated_at"] = now_iso()
+        table = table_registry()[collection]
+        module = importlib.import_module("src.agentic_coding.sql_adapter")
+        payload = getattr(module, "_encode")(existing)
+        payload = {key: value for key, value in payload.items() if key in table.c}
+        with engine.begin() as conn:
+            conn.execute(table.update().where(table.c.id == row_id).values(**payload))
+        return self.get_row(collection, row_id, owner)
