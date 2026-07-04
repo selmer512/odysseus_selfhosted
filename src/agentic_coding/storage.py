@@ -7,6 +7,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from sqlalchemy import select
+
 from core.database import engine
 from src.constants import DATA_DIR
 
