@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 
 from src.tool_execution import vet_workspace
@@ -13,11 +14,53 @@ from .security import wrap_untrusted_context
 from .storage import AgenticCodingStore, now_iso
 
 _IGNORE_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "build", ".cache"}
+_AGENTIC_PATHS = (
+    "src/agentic_coding/",
+    "companion/agentic_coding_ui.py",
+    "static/agentic-coding.js",
+    "static/agentic-coding.css",
+    "tests/test_agentic_coding",
+    ".github/workflows/agentic-coding.yml",
+    "docs/agentic-coding",
+)
 
 
 def _repo_relative(base: Path, path: Path) -> str:
     rel = path.relative_to(base)
     return str(rel).replace(os.sep, "/")
+
+
+def _goal_terms(goal: str) -> set[str]:
+    return {term for term in re.split(r"[^a-z0-9]+", (goal or "").lower()) if len(term) >= 4}
+
+
+def _score_file(path: str, goal: str) -> tuple[int, str]:
+    lower = path.lower()
+    terms = _goal_terms(goal)
+    score = 0
+    if any(lower.startswith(prefix) or lower == prefix for prefix in _AGENTIC_PATHS):
+        score += 120
+    if "agentic" in terms or "coding" in terms:
+        if "agentic" in lower or "coding" in lower:
+            score += 90
+    if "workspace" in terms and "workspace" in lower:
+        score += 40
+    if "artifact" in terms and ("artifact" in lower or "run_service" in lower):
+        score += 40
+    if "scaffold" in terms and "scaffold" in lower:
+        score += 40
+    if lower.startswith("tests/"):
+        score += 15
+    if lower.startswith("docs/"):
+        score += 10
+    score += sum(5 for term in terms if term in lower)
+    return (-score, path)
+
+
+def rank_likely_files(goal: str, repo_map: dict, limit: int = 30) -> list[str]:
+    candidates = list(dict.fromkeys((repo_map.get("important_files") or []) + (repo_map.get("files") or [])))
+    ranked = sorted(candidates, key=lambda path: _score_file(path, goal))
+    return ranked[:limit]
 
 
 def build_repo_map(path: str) -> dict:
@@ -48,7 +91,7 @@ def build_repo_map(path: str) -> dict:
 
 
 def build_scaffold(goal: str, repo_map: dict) -> dict:
-    likely = repo_map.get("important_files", [])[:30]
+    likely = rank_likely_files(goal, repo_map)
     return {
         "title": goal.strip()[:96] or "Agentic Coding scaffold",
         "likely_files": likely,
