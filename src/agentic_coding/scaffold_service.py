@@ -157,6 +157,7 @@ def _plan_from_context(goal: str, source_context: dict | None) -> list[str]:
         ])
     else:
         plan.append("Prepare a minimal patch against the highest-ranked integration files")
+    plan.append("Require explicit approval before execution or patch application")
     plan.append("Generate review artifacts before execution")
     return plan
 
