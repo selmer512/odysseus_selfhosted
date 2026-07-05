@@ -18,6 +18,11 @@
     log.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   }
 
+  function button(id, handler){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('click', handler);
+  }
+
   async function api(path, options){
     var response = await fetch('/api/agentic-coding' + path, Object.assign({
       headers: {'Content-Type': 'application/json'}
@@ -62,8 +67,12 @@
 
   async function createWorkspace(){
     try{
-      var path = document.getElementById('workspace-path').value;
-      var title = document.getElementById('workspace-title').value;
+      var pathInput = document.getElementById('workspace-path');
+      var titleInput = document.getElementById('workspace-title');
+      var path = pathInput && pathInput.value ? pathInput.value.trim() : '';
+      var title = titleInput && titleInput.value ? titleInput.value.trim() : '';
+      if(!path){ throw new Error('Workspace path is required. Try /app inside Docker or mount the host repo at /workspace/odysseus.'); }
+      show('Registering workspace: ' + path);
       var created = await api('/workspaces', {method:'POST', body: JSON.stringify({path:path, title:title || null})});
       await refresh();
       show(created);
@@ -75,6 +84,8 @@
       var workspaceId = workspaceSelect && workspaceSelect.value;
       var goal = document.getElementById('scaffold-goal').value;
       var model = profileSelect && profileSelect.value;
+      if(!workspaceId){ throw new Error('Register and select a workspace first.'); }
+      if(!goal || !goal.trim()){ throw new Error('Describe the code change to plan first.'); }
       var scaffold = await api('/scaffolds', {method:'POST', body: JSON.stringify({workspace_id:workspaceId, user_goal:goal, model:model || null})});
       latestScaffold = scaffold.id;
       latestRun = null;
@@ -113,5 +124,13 @@
   window.agenticApproveScaffold = approveScaffold;
   window.agenticCreateRun = createRun;
   window.agenticExecuteRun = executeRun;
+
+  button('register-workspace-button', createWorkspace);
+  button('refresh-workspaces-button', refresh);
+  button('generate-scaffold-button', createScaffold);
+  button('approve-scaffold-button', approveScaffold);
+  button('create-run-button', createRun);
+  button('prepare-artifacts-button', executeRun);
+
   refresh();
 })();
