@@ -31,3 +31,11 @@ def test_agentic_coding_native_module_injected_into_main_shell():
 def test_agentic_coding_native_module_not_injected_into_login_shell():
     html = "<html><body>Login</body></html>"
     assert inject_native_odysseus_modules(html, "/app/static/login.html") == html
+
+
+def test_agentic_coding_native_module_targets_visible_sidebar():
+    script = open("static/js/agenticCoding.js", "r", encoding="utf-8").read()
+
+    assert "tool-agentic-coding-btn" in script
+    assert "ensureSidebarButton" in script
+    assert "#sidebar .list-item" in script
