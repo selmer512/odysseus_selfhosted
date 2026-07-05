@@ -148,9 +148,38 @@ async function prepareArtifacts() {
       artifact_count: artifactRows.length,
       artifact_types: artifactRows.map(a => a.artifact_type),
       elapsed_ms: metricStartedAt ? Math.round(performance.now() - metricStartedAt) : null,
-      completed: run.status === 'completed' && artifactRows.length >= 6,
+      completed: run.status === 'completed' && artifactRows.length >= 7,
     };
     output({ metrics, run, artifacts: artifactRows });
+  } catch (err) {
+    output(String(err));
+  }
+}
+
+async function generatePatchProposal() {
+  try {
+    if (!latestRun) throw new Error('Create a run first.');
+    output(await api(`/runs/${latestRun}/patch-proposal`, { method: 'POST' }));
+  } catch (err) {
+    output(String(err));
+  }
+}
+
+async function approvePatchProposal() {
+  try {
+    if (!latestRun) throw new Error('Create a run and patch proposal first.');
+    output(await api(`/runs/${latestRun}/approve-patch`, { method: 'POST' }));
+  } catch (err) {
+    output(String(err));
+  }
+}
+
+async function applyApprovedPatch() {
+  try {
+    if (!latestRun) throw new Error('Create, propose, and approve a patch first.');
+    const result = await api(`/runs/${latestRun}/apply-patch`, { method: 'POST' });
+    const artifacts = await api(`/runs/${latestRun}/artifacts`);
+    output({ result, artifacts: artifacts.artifacts || [] });
   } catch (err) {
     output(String(err));
   }
@@ -248,8 +277,11 @@ function ensureModal() {
               <button id="agentic-native-approve" type="button" class="secondary">Approve</button>
               <button id="agentic-native-run" type="button" class="secondary">Create run</button>
               <button id="agentic-native-artifacts" type="button" class="secondary">Prepare artifacts</button>
+              <button id="agentic-native-patch" type="button" class="secondary">Generate patch</button>
+              <button id="agentic-native-approve-patch" type="button" class="secondary">Approve patch</button>
+              <button id="agentic-native-apply-patch" type="button" class="danger">Apply patch</button>
             </div>
-            <p class="agentic-coding-metrics-note">Measurable success: completed run, ≥6 artifacts, elapsed time, and artifact types.</p>
+            <p class="agentic-coding-metrics-note">Measurable success: source-aware artifacts, explicit patch approval, then safe workspace-confined apply.</p>
           </section>
           <section class="agentic-coding-pane agentic-coding-output-card">
             <h2>Output / metrics</h2>
@@ -266,6 +298,9 @@ function ensureModal() {
   document.getElementById('agentic-native-approve')?.addEventListener('click', approveScaffold);
   document.getElementById('agentic-native-run')?.addEventListener('click', createRun);
   document.getElementById('agentic-native-artifacts')?.addEventListener('click', prepareArtifacts);
+  document.getElementById('agentic-native-patch')?.addEventListener('click', generatePatchProposal);
+  document.getElementById('agentic-native-approve-patch')?.addEventListener('click', approvePatchProposal);
+  document.getElementById('agentic-native-apply-patch')?.addEventListener('click', applyApprovedPatch);
   registerManagedWindow();
 }
 
