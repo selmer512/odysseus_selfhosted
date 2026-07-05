@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 
-IMPORTANT_DIRS = ("src", "routes", "companion", "tests", "docs", ".github", "static")
+IMPORTANT_DIRS = ("core", "src", "routes", "scripts", "tests", "docs", "companion", ".github", "static")
 IMPORTANT_FILES = ("README.md", "ROADMAP.md", "app.py", "requirements.txt", "pyproject.toml", "Dockerfile", "docker-compose.yml")
 
 
