@@ -14,8 +14,8 @@ def _md_list(title: str, values: list | None) -> str:
     return f"# {title}\n\n{body}\n"
 
 
-def _repo_map_content(repo_map: dict) -> str:
-    return json.dumps(repo_map or {}, indent=2, ensure_ascii=False)
+def _json_content(value: dict | list | None) -> str:
+    return json.dumps(value or {}, indent=2, ensure_ascii=False)
 
 
 class AgenticCodingRunService:
@@ -32,13 +32,17 @@ class AgenticCodingRunService:
         run = self.store.get_row("runs", run_id, owner)
         scaffold = self.store.get_row("scaffolds", run["scaffold_id"], owner)
         goal = (scaffold.get("user_goal") or "").strip()
-        self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="repo_map", title="Repository map", content=_repo_map_content(scaffold.get("repo_map") or {}), metadata={})
+        metadata = scaffold.get("metadata") or {}
+        source_context = metadata.get("source_context") or {}
+        self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="repo_map", title="Repository map", content=_json_content(scaffold.get("repo_map") or {}), metadata={})
+        if source_context:
+            self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="source_context", title="Source context", content=_json_content(source_context), metadata={"file_count": source_context.get("count", 0)})
         self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="implementation_plan", title="Implementation plan", content=_md_list("Implementation plan", scaffold.get("implementation_plan")), metadata={})
         self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="test_plan", title="Test plan", content=_md_list("Test plan", scaffold.get("test_plan")), metadata={})
         self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="rollback_plan", title="Rollback plan", content=_md_list("Rollback plan", scaffold.get("rollback_plan")), metadata={})
         self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="commit_message", title="Commit message draft", content=f"Implement agentic coding workflow\n\nGoal: {goal}", metadata={})
-        self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="pr_summary", title="Pull request summary draft", content=f"# Summary\n\n- Prepared an approved Agentic Coding run for: {goal}\n- Review likely files before applying changes.\n- Run focused tests before merge.\n", metadata={})
-        return self.store.update_row("runs", run_id, owner, status="completed", started_at=now_iso(), completed_at=now_iso(), summary="Prepared review artifacts from the approved scaffold.")
+        self.store.add_row("artifacts", owner, run_id=run_id, artifact_type="pr_summary", title="Pull request summary draft", content=f"# Summary\n\n- Prepared an approved Agentic Coding run for: {goal}\n- Review likely files and source context before applying changes.\n- Run focused tests before merge.\n", metadata={})
+        return self.store.update_row("runs", run_id, owner, status="completed", started_at=now_iso(), completed_at=now_iso(), summary="Prepared source-aware review artifacts from the approved scaffold.")
 
     def record_test_command(self, owner: str | None, run_id: str, command: str | None) -> dict:
         payload = normalize_test_command(command)
