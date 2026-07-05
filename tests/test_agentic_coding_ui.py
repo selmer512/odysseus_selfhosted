@@ -39,3 +39,16 @@ def test_agentic_coding_native_module_targets_visible_sidebar():
     assert "tool-agentic-coding-btn" in script
     assert "ensureSidebarButton" in script
     assert "#sidebar .list-item" in script
+
+
+def test_agentic_coding_native_module_uses_managed_tool_window():
+    script = open("static/js/agenticCoding.js", "r", encoding="utf-8").read()
+    css = open("static/agentic-coding-native.css", "r", encoding="utf-8").read()
+
+    assert "from './modalManager.js'" in script
+    assert "from './windowDrag.js'" in script
+    assert "Modals.register" in script
+    assert "Modals.injectMinimizeButton" in script
+    assert "makeWindowDraggable" in script
+    assert "agentic-coding-window" in css
+    assert "resizeStorageKey" in script
