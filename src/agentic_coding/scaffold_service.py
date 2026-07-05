@@ -53,7 +53,11 @@ def _has_any(terms: set[str], values: tuple[str, ...]) -> bool:
 
 def _path_matches(path: str, hints: tuple[str, ...]) -> bool:
     lower = path.lower()
-    return any(lower == hint or lower.startswith(hint) or hint in lower for hint in hints)
+    for hint in hints:
+        h = hint.lower()
+        if lower == h or lower.startswith(h) or h in lower:
+            return True
+    return False
 
 
 def _score_file(path: str, goal: str) -> tuple[int, str]:
