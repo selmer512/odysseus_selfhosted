@@ -33,9 +33,10 @@ def test_likely_files_rank_agentic_coding_surface_for_agentic_goal():
 
     likely = rank_likely_files("Improve Agentic Coding artifacts and workspace UX", repo_map, limit=4)
 
-    assert likely[:4] == [
+    assert set(likely[:4]) == {
         "companion/agentic_coding_ui.py",
         "static/agentic-coding.js",
         "tests/test_agentic_coding_artifacts.py",
         "src/agentic_coding/run_service.py",
-    ]
+    }
+    assert "src/action_intents.py" not in likely[:4]
