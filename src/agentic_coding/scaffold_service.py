@@ -27,10 +27,10 @@ def build_repo_map(path: str) -> dict:
     seen: set[str] = set()
     for walk_root in ordered_walk_roots(path):
         for root, dirnames, filenames in os.walk(walk_root):
-            rel_root = Path(root).relative_to(base)
+            root_path = Path(root)
             dirnames[:] = [d for d in sorted(dirnames) if d not in _IGNORE_DIRS]
             for name in sorted(filenames):
-                rel = _repo_relative(base, rel_root / name)
+                rel = _repo_relative(base, root_path / name)
                 if rel in seen:
                     continue
                 seen.add(rel)
