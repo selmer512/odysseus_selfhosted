@@ -1,9 +1,13 @@
 // Agentic Coding native Odysseus UX module.
-// Adds a real Odysseus-launched modal that uses the same review-first API flow
-// as the standalone /agentic-coding page. The standalone route remains only as
-// a fallback/deep-link while the primary UX lives inside Odysseus.
+// Primary UX lives inside the Odysseus app shell as a managed tool window.
+
+import * as Modals from './modalManager.js';
+import { makeWindowDraggable } from './windowDrag.js';
 
 const API = '/api/agentic-coding';
+const MODAL_ID = 'agentic-coding-modal';
+const SIDEBAR_BTN_ID = 'tool-agentic-coding-btn';
+const RAIL_BTN_ID = 'rail-agentic-coding';
 let latestScaffold = null;
 let latestRun = null;
 let metricStartedAt = 0;
@@ -12,6 +16,15 @@ function esc(value) {
   return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[ch]);
+}
+
+function ensureStyles() {
+  if (document.getElementById('agentic-coding-native-css')) return;
+  const link = document.createElement('link');
+  link.id = 'agentic-coding-native-css';
+  link.rel = 'stylesheet';
+  link.href = '/static/agentic-coding-native.css';
+  document.head.appendChild(link);
 }
 
 async function api(path, options = {}) {
@@ -37,6 +50,10 @@ function setStatus(text) {
 
 function option(value, label) {
   return `<option value="${esc(value)}">${esc(label || value || '')}</option>`;
+}
+
+function codeIcon(size = 14) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline><line x1="14" y1="4" x2="10" y2="20"></line></svg>`;
 }
 
 function renderWorkspaces(rows) {
@@ -139,64 +156,107 @@ async function prepareArtifacts() {
   }
 }
 
-function openModal() {
-  const modal = document.getElementById('agentic-coding-modal');
+function registerManagedWindow() {
+  const modal = document.getElementById(MODAL_ID);
   if (!modal) return;
-  modal.classList.remove('hidden');
+  const content = modal.querySelector('.modal-content');
+  const header = modal.querySelector('.modal-header');
+  if (!Modals.isRegistered(MODAL_ID)) {
+    Modals.register(MODAL_ID, {
+      railBtnId: RAIL_BTN_ID,
+      sidebarBtnId: SIDEBAR_BTN_ID,
+      label: 'Agentic Coding',
+      icon: codeIcon(),
+      restoreFn: () => refreshAgenticCoding(),
+      closeFn: () => {
+        const live = document.getElementById(MODAL_ID);
+        if (live) live.classList.add('hidden');
+      },
+    });
+  }
+  Modals.injectMinimizeButton(modal, MODAL_ID);
+  if (!modal.dataset.agenticDragBound && content && header) {
+    modal.dataset.agenticDragBound = '1';
+    makeWindowDraggable(modal, {
+      content,
+      header,
+      minWidth: 720,
+      minHeight: 520,
+      resizeStorageKey: 'winsize-agentic-coding-modal',
+      skipSelector: 'button, input, select, textarea',
+    });
+  }
+}
+
+function openModal() {
+  ensureStyles();
+  ensureModal();
+  if (Modals.toggle(MODAL_ID)) return;
+  const modal = document.getElementById(MODAL_ID);
+  if (!modal) return;
+  modal.classList.remove('hidden', 'modal-minimized');
+  modal.style.display = '';
+  registerManagedWindow();
   refreshAgenticCoding();
 }
 
 function closeModal() {
-  const modal = document.getElementById('agentic-coding-modal');
-  if (modal) modal.classList.add('hidden');
+  Modals.close(MODAL_ID);
 }
 
 function ensureModal() {
-  if (document.getElementById('agentic-coding-modal')) return;
-  const modal = document.createElement('div');
-  modal.id = 'agentic-coding-modal';
+  ensureStyles();
+  let modal = document.getElementById(MODAL_ID);
+  if (modal) {
+    registerManagedWindow();
+    return;
+  }
+  modal = document.createElement('div');
+  modal.id = MODAL_ID;
   modal.className = 'modal hidden';
   modal.innerHTML = `
-    <div class="modal-content" role="dialog" aria-label="Agentic Coding" style="max-width:1100px;width:min(1100px,94vw);max-height:88vh;overflow:auto;background:var(--bg);">
+    <div class="modal-content agentic-coding-window" role="dialog" aria-label="Agentic Coding">
       <div class="modal-header">
-        <h4>Agentic Coding</h4>
+        <h4 class="agentic-coding-title">${codeIcon(16)}<span>Agentic Coding</span></h4>
         <button class="close-btn" id="close-agentic-coding-modal" aria-label="Close Agentic Coding">✖</button>
       </div>
-      <div class="modal-body" style="display:grid;grid-template-columns:minmax(280px,380px) 1fr;gap:14px;align-items:start;">
-        <section class="admin-card">
+      <div class="agentic-coding-shell">
+        <section class="agentic-coding-pane">
           <span class="pill" id="agentic-native-status">Checking backend...</span>
           <h2>Workspace</h2>
-          <label>Path</label>
+          <label for="agentic-native-path">Path</label>
           <input id="agentic-native-path" placeholder="/app" value="/app">
-          <label>Title</label>
+          <label for="agentic-native-title">Title</label>
           <input id="agentic-native-title" placeholder="Odysseus container repo">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <div class="agentic-coding-actions">
             <button id="agentic-native-register" type="button">Register workspace</button>
             <button id="agentic-native-refresh" type="button" class="secondary">Refresh</button>
           </div>
-          <div id="agentic-native-workspaces" style="margin-top:10px;"></div>
+          <div id="agentic-native-workspaces" class="agentic-coding-workspaces"></div>
         </section>
-        <section class="admin-card">
-          <h2>Review-first run</h2>
-          <label>Workspace</label>
-          <select id="agentic-native-workspace-select"></select>
-          <label>Model profile</label>
-          <select id="agentic-native-profile-select"></select>
-          <label>Measurable goal</label>
-          <textarea id="agentic-native-goal" rows="4" placeholder="Improve Agentic Coding artifact output and workspace registration UX."></textarea>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-            <button id="agentic-native-scaffold" type="button">Generate scaffold</button>
-            <button id="agentic-native-approve" type="button" class="secondary">Approve</button>
-            <button id="agentic-native-run" type="button" class="secondary">Create run</button>
-            <button id="agentic-native-artifacts" type="button" class="secondary">Prepare artifacts</button>
-          </div>
-          <p class="muted">Measurable success: completed run, ≥6 artifacts, elapsed time, and artifact types shown below.</p>
-        </section>
+        <div class="agentic-coding-main">
+          <section class="agentic-coding-pane agentic-coding-run-card">
+            <h2>Review-first run</h2>
+            <label for="agentic-native-workspace-select">Workspace</label>
+            <select id="agentic-native-workspace-select"></select>
+            <label for="agentic-native-profile-select">Model profile</label>
+            <select id="agentic-native-profile-select"></select>
+            <label for="agentic-native-goal">Measurable goal</label>
+            <textarea id="agentic-native-goal" rows="4" placeholder="Improve Agentic Coding artifact output and workspace registration UX."></textarea>
+            <div class="agentic-coding-actions">
+              <button id="agentic-native-scaffold" type="button">Generate scaffold</button>
+              <button id="agentic-native-approve" type="button" class="secondary">Approve</button>
+              <button id="agentic-native-run" type="button" class="secondary">Create run</button>
+              <button id="agentic-native-artifacts" type="button" class="secondary">Prepare artifacts</button>
+            </div>
+            <p class="agentic-coding-metrics-note">Measurable success: completed run, ≥6 artifacts, elapsed time, and artifact types.</p>
+          </section>
+          <section class="agentic-coding-pane agentic-coding-output-card">
+            <h2>Output / metrics</h2>
+            <pre id="agentic-native-output">Loading...</pre>
+          </section>
+        </div>
       </div>
-      <section class="admin-card" style="margin:14px;">
-        <h2>Output / metrics</h2>
-        <pre id="agentic-native-output" style="white-space:pre-wrap;max-height:320px;overflow:auto;">Loading...</pre>
-      </section>
     </div>`;
   document.body.appendChild(modal);
   document.getElementById('close-agentic-coding-modal')?.addEventListener('click', closeModal);
@@ -206,31 +266,25 @@ function ensureModal() {
   document.getElementById('agentic-native-approve')?.addEventListener('click', approveScaffold);
   document.getElementById('agentic-native-run')?.addEventListener('click', createRun);
   document.getElementById('agentic-native-artifacts')?.addEventListener('click', prepareArtifacts);
-}
-
-function codeIcon() {
-  return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>';
+  registerManagedWindow();
 }
 
 function makeSidebarButton() {
   const btn = document.createElement('button');
-  btn.id = 'tool-agentic-coding-btn';
+  btn.id = SIDEBAR_BTN_ID;
   btn.type = 'button';
   btn.className = 'list-item tool-item';
   btn.setAttribute('aria-label', 'Agentic Coding');
   btn.innerHTML = `${codeIcon()}<span>Agentic Coding</span>`;
-  btn.addEventListener('click', () => {
-    ensureModal();
-    openModal();
-  });
+  btn.addEventListener('click', openModal);
   return btn;
 }
 
 function ensureSidebarButton() {
-  if (document.getElementById('tool-agentic-coding-btn')) return;
+  if (document.getElementById(SIDEBAR_BTN_ID)) return;
   const toolItems = Array.from(document.querySelectorAll('#sidebar .list-item'));
-  const cookbook = toolItems.find(el => /cookbook/i.test(el.textContent || ''));
   const deepResearch = toolItems.find(el => /deep research/i.test(el.textContent || ''));
+  const cookbook = toolItems.find(el => /cookbook/i.test(el.textContent || ''));
   const anchor = deepResearch || cookbook;
   const btn = makeSidebarButton();
   if (anchor && anchor.parentElement) {
@@ -243,23 +297,21 @@ function ensureSidebarButton() {
 
 function ensureRailButton() {
   const rail = document.getElementById('icon-rail');
-  if (!rail || document.getElementById('rail-agentic-coding')) return;
+  if (!rail || document.getElementById(RAIL_BTN_ID)) return;
   const btn = document.createElement('button');
-  btn.id = 'rail-agentic-coding';
+  btn.id = RAIL_BTN_ID;
   btn.type = 'button';
   btn.className = 'icon-rail-btn';
   btn.title = 'Agentic Coding';
   btn.setAttribute('aria-label', 'Agentic Coding');
-  btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline><line x1="14" y1="4" x2="10" y2="20"></line></svg><span class="rail-hover-label">Agentic Coding</span>`;
-  btn.addEventListener('click', () => {
-    ensureModal();
-    openModal();
-  });
+  btn.innerHTML = `${codeIcon(18)}<span class="rail-hover-label">Agentic Coding</span>`;
+  btn.addEventListener('click', openModal);
   const settings = document.getElementById('rail-settings');
   rail.insertBefore(btn, settings || null);
 }
 
 function initAgenticCodingUx() {
+  ensureStyles();
   ensureModal();
   ensureSidebarButton();
   ensureRailButton();
