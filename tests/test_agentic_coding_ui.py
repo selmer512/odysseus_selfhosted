@@ -52,3 +52,14 @@ def test_agentic_coding_native_module_uses_managed_tool_window():
     assert "makeWindowDraggable" in script
     assert "agentic-coding-window" in css
     assert "resizeStorageKey" in script
+
+
+def test_agentic_coding_native_module_exposes_patch_controls():
+    script = open("static/js/agenticCoding.js", "r", encoding="utf-8").read()
+
+    assert "agentic-native-patch" in script
+    assert "agentic-native-approve-patch" in script
+    assert "agentic-native-apply-patch" in script
+    assert "/patch-proposal" in script
+    assert "/approve-patch" in script
+    assert "/apply-patch" in script
