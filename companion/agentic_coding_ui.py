@@ -38,8 +38,8 @@ _PAGE = """<!doctype html>
       <input id="workspace-path" placeholder="/workspace/odysseus">
       <label>Title</label>
       <input id="workspace-title" placeholder="Odysseus repository">
-      <button onclick="agenticCreateWorkspace()">Register workspace</button>
-      <button class="secondary" onclick="agenticCodingRefresh()">Refresh</button>
+      <button id="register-workspace-button" type="button">Register workspace</button>
+      <button id="refresh-workspaces-button" type="button" class="secondary">Refresh</button>
       <div id="workspace-list"></div>
     </section>
     <section class="card">
@@ -50,10 +50,10 @@ _PAGE = """<!doctype html>
       <select id="profile-select"></select>
       <label>Goal</label>
       <textarea id="scaffold-goal" placeholder="Describe the code change to plan..."></textarea>
-      <button onclick="agenticCreateScaffold()">Generate scaffold</button>
-      <button class="secondary" onclick="agenticApproveScaffold()">Approve latest scaffold</button>
-      <button class="secondary" onclick="agenticCreateRun()">Create run</button>
-      <button class="secondary" onclick="agenticExecuteRun()">Prepare artifacts</button>
+      <button id="generate-scaffold-button" type="button">Generate scaffold</button>
+      <button id="approve-scaffold-button" type="button" class="secondary">Approve latest scaffold</button>
+      <button id="create-run-button" type="button" class="secondary">Create run</button>
+      <button id="prepare-artifacts-button" type="button" class="secondary">Prepare artifacts</button>
     </section>
   </main>
   <section class="card output-card">
