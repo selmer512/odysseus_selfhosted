@@ -1,7 +1,7 @@
 // Agentic Coding native Odysseus UX module.
-// Adds a real rail-launched modal that uses the same review-first API flow as
-// the standalone /agentic-coding page. The standalone route remains only as a
-// fallback/deep-link while the primary UX lives inside Odysseus.
+// Adds a real Odysseus-launched modal that uses the same review-first API flow
+// as the standalone /agentic-coding page. The standalone route remains only as
+// a fallback/deep-link while the primary UX lives inside Odysseus.
 
 const API = '/api/agentic-coding';
 let latestScaffold = null;
@@ -208,6 +208,39 @@ function ensureModal() {
   document.getElementById('agentic-native-artifacts')?.addEventListener('click', prepareArtifacts);
 }
 
+function codeIcon() {
+  return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>';
+}
+
+function makeSidebarButton() {
+  const btn = document.createElement('button');
+  btn.id = 'tool-agentic-coding-btn';
+  btn.type = 'button';
+  btn.className = 'list-item tool-item';
+  btn.setAttribute('aria-label', 'Agentic Coding');
+  btn.innerHTML = `${codeIcon()}<span>Agentic Coding</span>`;
+  btn.addEventListener('click', () => {
+    ensureModal();
+    openModal();
+  });
+  return btn;
+}
+
+function ensureSidebarButton() {
+  if (document.getElementById('tool-agentic-coding-btn')) return;
+  const toolItems = Array.from(document.querySelectorAll('#sidebar .list-item'));
+  const cookbook = toolItems.find(el => /cookbook/i.test(el.textContent || ''));
+  const deepResearch = toolItems.find(el => /deep research/i.test(el.textContent || ''));
+  const anchor = deepResearch || cookbook;
+  const btn = makeSidebarButton();
+  if (anchor && anchor.parentElement) {
+    anchor.parentElement.insertBefore(btn, anchor.nextSibling);
+    return;
+  }
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.appendChild(btn);
+}
+
 function ensureRailButton() {
   const rail = document.getElementById('icon-rail');
   if (!rail || document.getElementById('rail-agentic-coding')) return;
@@ -228,6 +261,7 @@ function ensureRailButton() {
 
 function initAgenticCodingUx() {
   ensureModal();
+  ensureSidebarButton();
   ensureRailButton();
   if (window.location.pathname === '/agentic-coding-native') openModal();
 }
