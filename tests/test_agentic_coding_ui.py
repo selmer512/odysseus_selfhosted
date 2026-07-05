@@ -1,4 +1,5 @@
 from companion.agentic_coding_ui import _PAGE, make_agentic_coding_ui_router
+from src.app_helpers import inject_native_odysseus_modules
 
 
 def test_agentic_coding_ui_route_exists():
@@ -17,3 +18,16 @@ def test_agentic_coding_ui_loads_static_assets_and_controls():
 
 def test_agentic_coding_ui_avoids_inline_event_handlers():
     assert "onclick=" not in _PAGE
+
+
+def test_agentic_coding_native_module_injected_into_main_shell():
+    html = "<html><body><main>Odysseus</main></body></html>"
+    injected = inject_native_odysseus_modules(html, "/app/static/index.html")
+
+    assert "/static/js/agenticCoding.js" in injected
+    assert injected.count("agenticCoding.js") == 1
+
+
+def test_agentic_coding_native_module_not_injected_into_login_shell():
+    html = "<html><body>Login</body></html>"
+    assert inject_native_odysseus_modules(html, "/app/static/login.html") == html
