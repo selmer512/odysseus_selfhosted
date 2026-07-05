@@ -51,7 +51,7 @@ class MemoryStore:
 
 
 @pytest.mark.asyncio
-async def test_agentic_coding_measurable_lifecycle(tmp_path, capsys):
+async def test_agentic_coding_measurable_lifecycle(tmp_path):
     (tmp_path / "src" / "agentic_coding").mkdir(parents=True)
     (tmp_path / "companion").mkdir()
     (tmp_path / "static").mkdir()
@@ -84,7 +84,6 @@ async def test_agentic_coding_measurable_lifecycle(tmp_path, capsys):
         "likely_files": scaffold["likely_files"][:6],
     }
     print("AGENTIC_CODING_METRICS " + json.dumps(metrics, sort_keys=True))
-    capsys.readouterr()
 
     assert metrics["status"] == "completed"
     assert metrics["artifact_count"] >= 6
