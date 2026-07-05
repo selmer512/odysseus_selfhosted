@@ -82,11 +82,13 @@ async def test_agentic_coding_measurable_lifecycle(tmp_path):
         "artifact_types": sorted({artifact["artifact_type"] for artifact in artifacts}),
         "elapsed_ms": elapsed_ms,
         "likely_files": scaffold["likely_files"][:6],
+        "source_context_count": scaffold["metadata"]["source_context"]["count"],
     }
     print("AGENTIC_CODING_METRICS " + json.dumps(metrics, sort_keys=True))
 
     assert metrics["status"] == "completed"
-    assert metrics["artifact_count"] >= 6
-    assert {"repo_map", "implementation_plan", "test_plan", "rollback_plan", "commit_message", "pr_summary"}.issubset(metrics["artifact_types"])
+    assert metrics["artifact_count"] >= 7
+    assert {"repo_map", "source_context", "implementation_plan", "test_plan", "rollback_plan", "commit_message", "pr_summary"}.issubset(metrics["artifact_types"])
+    assert metrics["source_context_count"] >= 3
     assert any(path.startswith("src/agentic_coding/") for path in metrics["likely_files"])
     assert "companion/agentic_coding_ui.py" in metrics["likely_files"]
