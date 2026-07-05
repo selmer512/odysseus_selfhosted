@@ -17,11 +17,23 @@ _IGNORE_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", "dist", 
 _AGENTIC_PATHS = (
     "src/agentic_coding/",
     "companion/agentic_coding_ui.py",
-    "static/agentic-coding.js",
-    "static/agentic-coding.css",
+    "static/agentic-coding",
     "tests/test_agentic_coding",
     ".github/workflows/agentic-coding.yml",
     "docs/agentic-coding",
+)
+_AUTH_PATH_HINTS = (
+    "core/auth.py",
+    "routes/auth_routes.py",
+    "src/auth_helpers.py",
+    "src/secret_storage.py",
+    "src/runtime_paths.py",
+    "scripts/",
+    "tests/test_auth",
+    "tests/test_admin",
+    "tests/test_reset",
+    "docs/",
+    "README.md",
 )
 
 
@@ -34,21 +46,52 @@ def _goal_terms(goal: str) -> set[str]:
     return {term for term in re.split(r"[^a-z0-9]+", (goal or "").lower()) if len(term) >= 4}
 
 
+def _has_any(terms: set[str], values: tuple[str, ...]) -> bool:
+    return any(value in terms for value in values)
+
+
+def _path_matches(path: str, hints: tuple[str, ...]) -> bool:
+    lower = path.lower()
+    return any(lower == hint or lower.startswith(hint) or hint in lower for hint in hints)
+
+
 def _score_file(path: str, goal: str) -> tuple[int, str]:
     lower = path.lower()
     terms = _goal_terms(goal)
     score = 0
-    if any(lower.startswith(prefix) or lower == prefix for prefix in _AGENTIC_PATHS):
+
+    is_agentic_goal = _has_any(terms, ("agentic", "coding", "scaffold", "artifact", "workspace"))
+    is_auth_goal = _has_any(terms, ("auth", "admin", "password", "reset", "login", "user", "username", "credential"))
+    is_script_goal = _has_any(terms, ("script", "utility", "docker", "container", "cli", "command"))
+    is_docs_goal = _has_any(terms, ("docs", "documentation", "readme", "usage"))
+    is_test_goal = _has_any(terms, ("test", "tests", "pytest"))
+
+    if is_agentic_goal and _path_matches(lower, _AGENTIC_PATHS):
         score += 120
-    if "agentic" in terms or "coding" in terms:
-        if "agentic" in lower or "coding" in lower:
-            score += 90
+    if is_auth_goal and _path_matches(lower, _AUTH_PATH_HINTS):
+        score += 140
+    if is_auth_goal and ("auth" in lower or "login" in lower or "secret" in lower):
+        score += 90
+    if is_auth_goal and ("admin" in lower or "user" in lower):
+        score += 45
+    if is_script_goal and (lower.startswith("scripts/") or "script" in lower or lower.endswith(".sh") or lower.endswith(".py")):
+        score += 55
+    if "password" in terms and ("password" in lower or "auth" in lower or "secret" in lower):
+        score += 75
+    if "reset" in terms and ("reset" in lower or "auth" in lower or "admin" in lower):
+        score += 65
+    if "docker" in terms or "container" in terms:
+        if lower in ("dockerfile", "docker-compose.yml") or lower.startswith("docker"):
+            score += 50
+    if is_test_goal and lower.startswith("tests/"):
+        score += 45
+    if is_docs_goal and (lower.startswith("docs/") or lower == "readme.md"):
+        score += 40
     if "workspace" in terms and "workspace" in lower:
         score += 40
     if "artifact" in terms and ("artifact" in lower or "run_service" in lower):
         score += 40
-    if "scaffold" in terms and "scaffold" in lower:
-        score += 40
+
     if lower.startswith("tests/"):
         score += 15
     if lower.startswith("docs/"):
@@ -80,14 +123,14 @@ def build_repo_map(path: str) -> dict:
                 if is_important_file(rel):
                     important.append(rel)
                 files.append(rel)
-                if len(files) >= 360:
+                if len(files) >= 420:
                     break
-            if len(files) >= 360:
+            if len(files) >= 420:
                 dirnames[:] = []
                 break
-        if len(files) >= 360:
+        if len(files) >= 420:
             break
-    return {"root_files": root_files(path), "files": files[:360], "important_files": important[:120], "generated_at": now_iso()}
+    return {"root_files": root_files(path), "files": files[:420], "important_files": important[:180], "generated_at": now_iso()}
 
 
 def build_scaffold(goal: str, repo_map: dict) -> dict:
