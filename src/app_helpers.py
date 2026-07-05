@@ -9,6 +9,7 @@ from starlette.requests import Request
 
 logger = logging.getLogger(__name__)
 
+
 def read_if_exists(path: str) -> str:
     """Read file if it exists, return empty string otherwise."""
     try:
@@ -17,15 +18,30 @@ def read_if_exists(path: str) -> str:
     except Exception:
         return ""
 
+
 def file_to_data_url(path: str, mime: str) -> str:
     """Convert file to data URL."""
     with open(path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode("ascii")
     return f"data:{mime};base64,{b64}"
 
+
 def abs_join(base_dir: str, rel: str) -> str:
     """Join paths and return absolute path."""
     return os.path.abspath(os.path.join(base_dir, rel))
+
+
+def inject_native_odysseus_modules(html: str, file_path: str) -> str:
+    """Inject additive native UX modules into the main Odysseus app shell."""
+    if os.path.basename(file_path or "") != "index.html":
+        return html
+    script = '<script type="module" src="/static/js/agenticCoding.js"></script>'
+    if "agenticCoding.js" in html:
+        return html
+    if "</body>" in html:
+        return html.replace("</body>", f"  {script}\n</body>", 1)
+    return html + "\n" + script + "\n"
+
 
 def serve_html_with_nonce(request: Request, file_path: str) -> HTMLResponse:
     """Read an app-bundled HTML page and inject the CSP nonce into inline <script> tags.
@@ -46,6 +62,7 @@ def serve_html_with_nonce(request: Request, file_path: str) -> HTMLResponse:
         raise HTTPException(500, "Internal server error")
     nonce = getattr(request.state, "csp_nonce", "")
     html = html.replace("{{CSP_NONCE}}", nonce)
+    html = inject_native_odysseus_modules(html, file_path)
     return HTMLResponse(html)
 
 
