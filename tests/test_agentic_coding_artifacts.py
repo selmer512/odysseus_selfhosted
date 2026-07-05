@@ -14,6 +14,7 @@ async def test_prepare_artifacts_creates_review_package():
                     "owner": "admin",
                     "user_goal": "Improve artifact output",
                     "repo_map": {"important_files": ["src/agentic_coding/run_service.py"]},
+                    "metadata": {"source_context": {"count": 1, "files": [{"path": "src/agentic_coding/run_service.py"}]}},
                     "implementation_plan": ["Inspect likely files"],
                     "test_plan": ["Run focused tests"],
                     "rollback_plan": ["Revert patch"],
@@ -41,4 +42,4 @@ async def test_prepare_artifacts_creates_review_package():
     artifact_types = {row["artifact_type"] for row in store.rows["artifacts"]}
 
     assert run["status"] == "completed"
-    assert {"repo_map", "implementation_plan", "test_plan", "rollback_plan", "commit_message", "pr_summary"}.issubset(artifact_types)
+    assert {"repo_map", "source_context", "implementation_plan", "test_plan", "rollback_plan", "commit_message", "pr_summary"}.issubset(artifact_types)
