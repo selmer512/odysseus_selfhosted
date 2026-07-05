@@ -1,0 +1,166 @@
+.agentic-coding-window {
+  width: min(1120px, calc(100vw - var(--sidebar-w, 0px) - 72px));
+  max-width: calc(100vw - 32px);
+  height: min(780px, calc(100vh - 64px));
+  max-height: calc(100vh - 32px);
+  min-width: min(720px, calc(100vw - 32px));
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg) 94%, var(--panel) 6%);
+  border: 1px solid color-mix(in srgb, var(--border) 76%, var(--accent, var(--red)) 24%);
+  box-shadow: 0 22px 80px rgba(0,0,0,0.42), 0 0 0 1px rgba(255,255,255,0.03) inset;
+}
+
+.agentic-coding-window .modal-header {
+  flex: 0 0 auto;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+}
+
+.agentic-coding-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.agentic-coding-title svg {
+  color: var(--accent, var(--red));
+}
+
+.agentic-coding-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+.agentic-coding-pane {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+}
+
+.agentic-coding-pane h2 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+.agentic-coding-pane label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: -4px;
+}
+
+.agentic-coding-pane input,
+.agentic-coding-pane select,
+.agentic-coding-pane textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.agentic-coding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agentic-coding-actions button {
+  white-space: nowrap;
+}
+
+.agentic-coding-workspaces {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.agentic-coding-workspaces .mini-card {
+  margin-top: 8px;
+}
+
+.agentic-coding-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  min-height: 0;
+}
+
+.agentic-coding-run-card {
+  min-height: 0;
+}
+
+.agentic-coding-output-card {
+  min-height: 0;
+  overflow: hidden;
+}
+
+#agentic-native-output {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 86%, black 14%);
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.agentic-coding-metrics-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#tool-agentic-coding-btn {
+  color: inherit;
+}
+
+#tool-agentic-coding-btn svg {
+  color: var(--accent, var(--red));
+}
+
+@media (max-width: 900px) {
+  .agentic-coding-window {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+    min-width: 0;
+    min-height: 0;
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+  }
+  .agentic-coding-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: auto;
+  }
+  .agentic-coding-main {
+    min-height: 620px;
+  }
+}
+
+@media (max-width: 640px) {
+  .agentic-coding-shell {
+    padding: 10px;
+    gap: 10px;
+  }
+  .agentic-coding-pane {
+    padding: 12px;
+    border-radius: 14px;
+  }
+  .agentic-coding-actions button {
+    flex: 1 1 100%;
+  }
+}
