@@ -246,6 +246,33 @@ def make_router() -> APIRouter:
         except KeyError as exc:
             raise _missing(exc) from exc
 
+    @router.post("/runs/{run_id}/patch-proposal")
+    def patch_proposal(request: Request, run_id: str):
+        try:
+            return runs.generate_patch_proposal(_owner(request), run_id)
+        except KeyError as exc:
+            raise _missing(exc) from exc
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+
+    @router.post("/runs/{run_id}/approve-patch")
+    def approve_patch(request: Request, run_id: str):
+        try:
+            return runs.approve_patch(_owner(request), run_id)
+        except KeyError as exc:
+            raise _missing(exc) from exc
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+
+    @router.post("/runs/{run_id}/apply-patch")
+    def apply_patch(request: Request, run_id: str):
+        try:
+            return runs.apply_patch(_owner(request), run_id)
+        except KeyError as exc:
+            raise _missing(exc) from exc
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+
     @router.post("/runs/{run_id}/cancel")
     def cancel_run(request: Request, run_id: str):
         try:
