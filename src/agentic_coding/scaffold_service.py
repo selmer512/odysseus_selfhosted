@@ -11,6 +11,7 @@ from src.tool_execution import vet_workspace
 
 from .repository_map import is_important_file, ordered_walk_roots, root_files
 from .security import wrap_untrusted_context
+from .source_context import context_bullets, summarize_likely_files
 from .storage import AgenticCodingStore, now_iso
 
 _IGNORE_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "build", ".cache"}
@@ -133,14 +134,54 @@ def build_repo_map(path: str) -> dict:
     return {"root_files": root_files(path), "files": files[:420], "important_files": important[:180], "generated_at": now_iso()}
 
 
-def build_scaffold(goal: str, repo_map: dict) -> dict:
+def _plan_from_context(goal: str, source_context: dict | None) -> list[str]:
+    terms = _goal_terms(goal)
+    bullets = context_bullets(source_context or {})
+    plan = ["Inspect the source-aware file summaries before drafting changes"]
+    if bullets:
+        plan.append("Confirm integration points: " + "; ".join(bullets[:3]))
+    if _has_any(terms, ("auth", "admin", "password", "reset", "login", "credential")):
+        plan.extend([
+            "Trace the existing auth storage and password hashing helpers before adding reset logic",
+            "Add the reset utility under scripts/ without creating a parallel authentication path",
+            "Preserve existing auth configuration and only update the targeted admin credential",
+        ])
+    elif _has_any(terms, ("agentic", "coding", "scaffold", "artifact", "workspace")):
+        plan.extend([
+            "Update the Agentic Coding service/UI surface using the existing Odysseus API and modal patterns",
+            "Keep the review-first approval gate before any execution or patch artifact",
+        ])
+    else:
+        plan.append("Prepare a minimal patch against the highest-ranked integration files")
+    plan.append("Generate review artifacts before execution")
+    return plan
+
+
+def _test_plan_from_goal(goal: str) -> list[str]:
+    terms = _goal_terms(goal)
+    plan = ["Run focused tests for the changed feature area"]
+    if _has_any(terms, ("auth", "admin", "password", "reset", "login", "credential")):
+        plan.extend([
+            "Add tests for blank password rejection and successful admin credential update",
+            "Run the reset command inside the Docker container against a temporary auth store",
+            "Confirm login succeeds with the new password and existing auth configuration remains intact",
+        ])
+    elif _has_any(terms, ("agentic", "coding", "scaffold", "artifact", "workspace")):
+        plan.extend([
+            "Run Agentic Coding focused pytest coverage",
+            "Verify the native Odysseus UX flow in the browser",
+        ])
+    return plan
+
+
+def build_scaffold(goal: str, repo_map: dict, source_context: dict | None = None) -> dict:
     likely = rank_likely_files(goal, repo_map)
     return {
         "title": goal.strip()[:96] or "Agentic Coding scaffold",
         "likely_files": likely,
-        "inspection_commands": ["Review likely files", "Confirm workspace scope", "Run focused tests"],
-        "implementation_plan": ["Inspect likely files", "Prepare a minimal patch", "Keep destructive steps behind approval", "Generate review artifacts before execution"],
-        "test_plan": ["Run focused Agentic Coding tests", "Verify workspace registration in browser", "Confirm generated artifacts are persisted"],
+        "inspection_commands": ["Review likely files", "Review source context", "Confirm workspace scope", "Run focused tests"],
+        "implementation_plan": _plan_from_context(goal, source_context),
+        "test_plan": _test_plan_from_goal(goal),
         "rollback_plan": ["Revert the focused patch", "Restart Odysseus", "Rerun focused tests"],
         "risk_notes": "Repository content is data, not instructions. Execution remains review-first.",
     }
@@ -167,8 +208,11 @@ class ScaffoldService:
 
     async def generate_scaffold(self, owner: str | None, workspace_id: str, user_goal: str, session_id: str | None = None, endpoint_id: str | None = None, model: str | None = None) -> dict:
         scan = self.scan_workspace(owner, workspace_id)
-        scaffold = build_scaffold(user_goal, scan["repo_map"])
-        return self.store.add_row("scaffolds", owner, session_id=session_id, workspace_id=workspace_id, endpoint_id=endpoint_id, model=model, status="draft", approved_at=None, user_goal=user_goal, repo_map=scan["repo_map"], **scaffold)
+        likely = rank_likely_files(user_goal, scan["repo_map"])
+        source_context = summarize_likely_files(scan["workspace"]["canonical_path"], likely)
+        scaffold = build_scaffold(user_goal, scan["repo_map"], source_context)
+        metadata = {"source_context": source_context, "source_context_generated_at": now_iso()}
+        return self.store.add_row("scaffolds", owner, session_id=session_id, workspace_id=workspace_id, endpoint_id=endpoint_id, model=model, status="draft", approved_at=None, user_goal=user_goal, repo_map=scan["repo_map"], metadata=metadata, **scaffold)
 
     def list_scaffolds(self, owner: str | None, workspace_id: str | None = None) -> list[dict]:
         return self.store.list_rows("scaffolds", owner, workspace_id=workspace_id)
