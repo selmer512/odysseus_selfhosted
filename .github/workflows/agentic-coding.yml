@@ -9,6 +9,7 @@ on:
       - 'companion/__init__.py'
       - 'companion/agentic_coding_ui.py'
       - 'static/agentic-coding.*'
+      - 'static/agentic-coding-native.css'
       - 'static/js/agenticCoding.js'
       - 'src/app_helpers.py'
       - 'tests/test_agentic_coding*.py'
